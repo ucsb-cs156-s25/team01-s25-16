@@ -45,9 +45,7 @@ jobs:
             echo "This workflow should not run on repos in the ucsb-cs156 organization"
             echo "continue=false" >> "$GITHUB_OUTPUT"
           fi
-          PREFIX=${REPOSITORY:7}
-          echo "PREFIX=$PREFIX"
-          if [[ "${PREFIX}" == "STARTER" ]]; then
+          if [[ "$REPOSITORY" == STARTER* ]]; then
             echo "This workflow should not run on STARTER repos"
             echo "continue=false" >> "$GITHUB_OUTPUT"
           fi
