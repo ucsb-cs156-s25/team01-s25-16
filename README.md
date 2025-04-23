@@ -19,7 +19,7 @@ Deployments:
 | RecommendationRequest     |  Wilson      |  Wilson730         |
 | MenuItemReview            |  Christian   |  applechristian    |
 | HelpRequest               |  Jeffrey     |  jeffreylin26      |
-| Articles                  |  Suhrit      |  suhritpadakati    |
+| Articles                  |  Suhrit      |  suhritpadakanti    |
 
 Remember though, that in spite of these initial  assignments, it is still
 a team project.  Please help other team members to finish their work
