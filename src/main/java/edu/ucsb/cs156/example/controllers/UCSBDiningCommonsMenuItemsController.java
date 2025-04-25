@@ -73,10 +73,10 @@ public class UCSBDiningCommonsMenuItemsController extends ApiController{
 
     /**
      * This method returns a single diningcommonsmenuitem.
-     * @param code code of the diningcommonsmenuitem
+     * @param id code of the diningcommonsmenuitem
      * @return a single diningcommonsmenuitem
      */
-    @Operation(summary= "Get a single commons menu item")
+    @Operation(summary= "Get a single dining commons menu item")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("")
     public UCSBDiningCommonsMenuItem getById(
