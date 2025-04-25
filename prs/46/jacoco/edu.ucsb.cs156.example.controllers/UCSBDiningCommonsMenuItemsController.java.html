@@ -73,10 +73,10 @@ import jakarta.validation.Valid;
 
     /**
      * This method returns a single diningcommonsmenuitem.
-     * @param code code of the diningcommonsmenuitem
+     * @param id code of the diningcommonsmenuitem
      * @return a single diningcommonsmenuitem
      */
-    @Operation(summary= &quot;Get a single commons menu item&quot;)
+    @Operation(summary= &quot;Get a single dining commons menu item&quot;)
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;&quot;)
     public UCSBDiningCommonsMenuItem getById(
