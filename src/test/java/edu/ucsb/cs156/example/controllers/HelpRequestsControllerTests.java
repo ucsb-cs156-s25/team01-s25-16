@@ -96,7 +96,7 @@ public class HelpRequestsControllerTests extends ControllerTestCase {
                             .tableOrBreakoutRoom("table2")
                             .requestTime(ldt2)
                             .explanation("need help")
-                            .solved(false)
+                            .solved(true)
                             .build();
 
             ArrayList<HelpRequest> helpRequests = new ArrayList<>();
