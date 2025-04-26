@@ -1,6 +1,7 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.HelpRequest;
+import edu.ucsb.cs156.example.entities.UCSBDate;
 import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.UCSBDateRepository;
 import edu.ucsb.cs156.example.repositories.HelpRequestRepository;
@@ -46,7 +47,7 @@ public class HelpRequestsController extends ApiController {
      * 
      * @return an iterable of Help Requests
      */
-    @Operation(summary= "List all help requests")
+    @Operation(summary = "List all help requests")
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/all")
     public Iterable<HelpRequest> allHelpRequests() {
@@ -54,29 +55,27 @@ public class HelpRequestsController extends ApiController {
         return helpRequests;
     }
 
-
-
     /**
      * Create a new help request
      * 
-     * @param requesterEmail requester email
-     * @param teamId team id
+     * @param requesterEmail      requester email
+     * @param teamId              team id
      * @param tableOrBreakoutRoom table or breakout room
-     * @param requestTime time of request
-     * @param explanation request explanation
-     * @param solved status of the help request
+     * @param requestTime         time of request
+     * @param explanation         request explanation
+     * @param solved              status of the help request
      * @return the saved help request
      */
-    @Operation(summary= "Create a new help request")
+    @Operation(summary = "Create a new help request")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
     public HelpRequest postHelpRequest(
-            @Parameter(name="requesterEmail") @RequestParam String requesterEmail,
-            @Parameter(name="teamId") @RequestParam String teamId,
-            @Parameter(name="tableOrBreakoutRoom") @RequestParam String tableOrBreakoutRoom,
-            @Parameter(name="requestTime", description="date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("requestTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime requestTime,
-            @Parameter(name="explanation") @RequestParam String explanation,
-            @Parameter(name="solved") @RequestParam boolean solved)
+            @Parameter(name = "requesterEmail") @RequestParam String requesterEmail,
+            @Parameter(name = "teamId") @RequestParam String teamId,
+            @Parameter(name = "tableOrBreakoutRoom") @RequestParam String tableOrBreakoutRoom,
+            @Parameter(name = "requestTime", description = "date (in iso format, e.g. YYYY-mm-ddTHH:MM:SS; see https://en.wikipedia.org/wiki/ISO_8601)") @RequestParam("requestTime") @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime requestTime,
+            @Parameter(name = "explanation") @RequestParam String explanation,
+            @Parameter(name = "solved") @RequestParam boolean solved)
             throws JsonProcessingException {
 
         // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -96,4 +95,22 @@ public class HelpRequestsController extends ApiController {
 
         return savedHelpRequest;
     }
+
+    /**
+     * Get a single help request by id
+     * 
+     * @param id the id of the help request
+     * @return a help request
+     */
+    @Operation(summary = "Get a single help request")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public HelpRequest getById(
+            @Parameter(name = "id") @RequestParam Long id) {
+        HelpRequest helpRequest = helpRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(HelpRequest.class, id));
+
+        return helpRequest;
+    }
+
 }
