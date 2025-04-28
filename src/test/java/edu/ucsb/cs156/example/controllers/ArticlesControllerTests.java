@@ -177,5 +177,78 @@ public void test_that_logged_in_user_can_get_by_id_when_article_exists() throws 
         Map<String, Object> json = mapper.readValue(responseString, Map.class);
         assertEquals("Article with id 123 not found", json.get("message"));
     }
+    @WithMockUser(roles = { "ADMIN", "USER" })
+@Test
+public void test_that_logged_in_admin_can_update_an_existing_article() throws Exception {
+    // arrange
+    LocalDateTime dateAdded = LocalDateTime.parse("2024-05-01T12:00:00");
 
+    Article originalArticle = Article.builder()
+        .title("Original Title")
+        .url("http://original.com")
+        .explanation("Original Explanation")
+        .email("original@example.com")
+        .dateAdded(dateAdded)
+        .build();
+
+    Article updatedArticle = Article.builder()
+        .title("Updated Title")
+        .url("http://updated.com")
+        .explanation("Updated Explanation")
+        .email("updated@example.com")
+        .dateAdded(LocalDateTime.parse("2024-06-01T15:30:00"))
+        .build();
+
+    when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.of(originalArticle));
+
+    // act
+    MvcResult response = mockMvc.perform(
+            put("/api/articles?id=123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8")
+                .content(mapper.writeValueAsString(updatedArticle))
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    // assert
+    verify(articlesRepository, times(1)).findById(123L);
+    verify(articlesRepository, times(1)).save(any(Article.class));
+
+    String responseString = response.getResponse().getContentAsString();
+    String expectedJson = mapper.writeValueAsString(updatedArticle);
+    assertEquals(expectedJson, responseString);
+}
+
+@WithMockUser(roles = { "ADMIN", "USER" })
+@Test
+public void test_that_logged_in_admin_gets_404_when_updating_nonexistent_article() throws Exception {
+    // arrange
+    when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.empty());
+
+    Article updatedArticle = Article.builder()
+        .title("Updated Title")
+        .url("http://updated.com")
+        .explanation("Updated Explanation")
+        .email("updated@example.com")
+        .dateAdded(LocalDateTime.parse("2024-05-01T12:00:00"))
+        .build();
+
+    // act
+    MvcResult response = mockMvc.perform(
+            put("/api/articles?id=123")
+                .contentType(MediaType.APPLICATION_JSON)
+                .characterEncoding("utf-8")
+                .content(mapper.writeValueAsString(updatedArticle))
+                .with(csrf()))
+        .andExpect(status().isNotFound())
+        .andReturn();
+
+    // assert
+    verify(articlesRepository, times(1)).findById(123L);
+
+    String responseString = response.getResponse().getContentAsString();
+    Map<String, Object> json = mapper.readValue(responseString, Map.class);
+    assertEquals("Article with id 123 not found", json.get("message"));
+}
 }
