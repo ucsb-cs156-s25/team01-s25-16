@@ -251,4 +251,56 @@ public void test_that_logged_in_admin_gets_404_when_updating_nonexistent_article
     Map<String, Object> json = mapper.readValue(responseString, Map.class);
     assertEquals("Article with id 123 not found", json.get("message"));
 }
+@WithMockUser(roles = { "ADMIN", "USER" })
+@Test
+public void test_that_logged_in_admin_can_delete_an_existing_article() throws Exception {
+    // arrange
+    LocalDateTime dateAdded = LocalDateTime.parse("2024-05-01T12:00:00");
+
+    Article article = Article.builder()
+        .title("Test Title")
+        .url("http://testurl.com")
+        .explanation("Test Explanation")
+        .email("test@example.com")
+        .dateAdded(dateAdded)
+        .build();
+
+    when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.of(article));
+
+    // act
+    MvcResult response = mockMvc.perform(
+            delete("/api/articles?id=123")
+                .with(csrf()))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    // assert
+    verify(articlesRepository, times(1)).findById(123L);
+    verify(articlesRepository, times(1)).delete(article);
+
+    String responseString = response.getResponse().getContentAsString();
+    assertEquals("record 123 deleted", responseString);
+}
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void test_that_logged_in_admin_gets_404_when_deleting_nonexistent_article() throws Exception {
+        // arrange
+        when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.empty());
+
+        // act
+        MvcResult response = mockMvc.perform(
+                delete("/api/articles?id=123")
+                    .with(csrf()))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        // assert
+        verify(articlesRepository, times(1)).findById(123L);
+
+        String responseString = response.getResponse().getContentAsString();
+        Map<String, Object> json = mapper.readValue(responseString, Map.class);
+        assertEquals("Article with id 123 not found", json.get("message"));
+    }
+
 }
