@@ -270,7 +270,7 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
         // act
         MvcResult response = mockMvc.perform(
                 put("/api/ucsborganization?id=67")
-                        .contentType(MediaType.APPLICATION_JSON) //app_json import included at top
+                        .contentType(MediaType.APPLICATION_JSON) // app_json import included at top
                         .characterEncoding("utf-8")
                         .content(requestBody)
                         .with(csrf()))
@@ -282,7 +282,7 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
         String responseString = response.getResponse().getContentAsString();
         assertEquals(requestBody, responseString);
     }
-    
+
     @WithMockUser(roles = { "ADMIN", "USER" })
     @Test
     public void admin_cannot_edit_ucsborganization_that_does_not_exist() throws Exception {
@@ -313,6 +313,54 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
         Map<String, Object> json = responseToJson(response);
         assertEquals("UCSBOrganization with id 67 not found", json.get("message"));
 
+    }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void admin_can_delete_a_organization() throws Exception {
+        // arrange
+
+        UCSBOrganization org = UCSBOrganization.builder()
+                .orgCode("INACT")
+                .orgTranslationShort("Inactive Club")
+                .orgTranslation("Currently Inactive Organization")
+                .inactive(true)
+                .build();
+
+        when(ucsbOrganizationRepository.findById(eq(15L))).thenReturn(Optional.of(org));
+
+        // act
+        MvcResult response = mockMvc.perform(
+                delete("/api/ucsborganization?id=15")
+                        .with(csrf()))
+                .andExpect(status().isOk()).andReturn();
+
+        // assert
+        verify(ucsbOrganizationRepository, times(1)).findById(15L);
+        verify(ucsbOrganizationRepository, times(1)).delete(eq(org));
+
+        Map<String, Object> json = responseToJson(response);
+        assertEquals("UCSBOrganization with id 15 deleted", json.get("message"));
+    }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void admin_tries_to_delete_non_existant_ucsborganization_and_gets_right_error_message()
+            throws Exception {
+        // arrange
+
+        when(ucsbOrganizationRepository.findById(eq(15L))).thenReturn(Optional.empty());
+
+        // act
+        MvcResult response = mockMvc.perform(
+                delete("/api/ucsborganization?id=15")
+                        .with(csrf()))
+                .andExpect(status().isNotFound()).andReturn();
+
+        // assert
+        verify(ucsbOrganizationRepository, times(1)).findById(15L);
+        Map<String, Object> json = responseToJson(response);
+        assertEquals("UCSBOrganization with id 15 not found", json.get("message"));
     }
 
 }
