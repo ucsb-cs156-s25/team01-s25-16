@@ -107,5 +107,32 @@ import java.time.LocalDateTime;
 <span class="fc" id="L107">        return ucsbOrganization;</span>
     }
 
+    /**
+     * Update a single ucsborganization
+     * 
+     * @param id       id of the ucsborganization to update
+     * @param incoming the new ucsborganization
+     * @return the updated ucsborganization object
+     */
+    @Operation(summary = &quot;Update a single ucsborganization&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
+    @PutMapping(&quot;&quot;)
+    public UCSBOrganization updateUCSBOrganization(
+            @Parameter(name = &quot;id&quot;) @RequestParam Long id,
+            @RequestBody @Valid UCSBOrganization incoming) {
+
+<span class="fc" id="L124">        UCSBOrganization ucsbOrganization = ucsbOrganizationRepository.findById(id)</span>
+<span class="fc" id="L125">                .orElseThrow(() -&gt; new EntityNotFoundException(UCSBOrganization.class, id));</span>
+
+<span class="fc" id="L127">        ucsbOrganization.setInactive(incoming.getInactive());</span>
+<span class="fc" id="L128">        ucsbOrganization.setOrgCode(incoming.getOrgCode());</span>
+<span class="fc" id="L129">        ucsbOrganization.setOrgTranslation(incoming.getOrgTranslation());</span>
+<span class="fc" id="L130">        ucsbOrganization.setOrgTranslationShort(incoming.getOrgTranslationShort());</span>
+
+<span class="fc" id="L132">        ucsbOrganizationRepository.save(ucsbOrganization);</span>
+
+<span class="fc" id="L134">        return ucsbOrganization;</span>
+    }
+
 }
 </pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.12.202403310830</span></div></body></html>
