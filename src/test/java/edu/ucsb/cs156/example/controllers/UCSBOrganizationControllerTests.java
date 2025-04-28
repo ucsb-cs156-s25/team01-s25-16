@@ -18,6 +18,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MvcResult;
 
+import org.springframework.http.MediaType; //changed from import com.google.common.net.MediaType;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -240,6 +242,77 @@ public class UCSBOrganizationControllerTests extends ControllerTestCase {
         Map<String, Object> json = responseToJson(response);
         assertEquals("EntityNotFoundException", json.get("type"));
         assertEquals("UCSBOrganization with id 7 not found", json.get("message"));
+    }
+
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void admin_can_edit_an_existing_ucsborganization() throws Exception {
+        // arrange
+
+        UCSBOrganization org = UCSBOrganization.builder()
+                .orgCode("INACT")
+                .orgTranslationShort("Inactive Club")
+                .orgTranslation("Currently Inactive Organization")
+                .inactive(true)
+                .build();
+
+        UCSBOrganization editedOrg = UCSBOrganization.builder()
+                .orgCode("NEW-INACT")
+                .orgTranslationShort("New Inactive Club")
+                .orgTranslation("Currently New Inactive Organization")
+                .inactive(false)
+                .build();
+
+        String requestBody = mapper.writeValueAsString(editedOrg);
+
+        when(ucsbOrganizationRepository.findById(eq(67L))).thenReturn(Optional.of(org));
+
+        // act
+        MvcResult response = mockMvc.perform(
+                put("/api/ucsborganization?id=67")
+                        .contentType(MediaType.APPLICATION_JSON) //app_json import included at top
+                        .characterEncoding("utf-8")
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isOk()).andReturn();
+
+        // assert
+        verify(ucsbOrganizationRepository, times(1)).findById(67L);
+        verify(ucsbOrganizationRepository, times(1)).save(editedOrg);
+        String responseString = response.getResponse().getContentAsString();
+        assertEquals(requestBody, responseString);
+    }
+    
+    @WithMockUser(roles = { "ADMIN", "USER" })
+    @Test
+    public void admin_cannot_edit_ucsborganization_that_does_not_exist() throws Exception {
+        // arrange
+
+        UCSBOrganization org = UCSBOrganization.builder()
+                .orgCode("INACT")
+                .orgTranslationShort("Inactive Club")
+                .orgTranslation("Currently Inactive Organization")
+                .inactive(true)
+                .build();
+
+        String requestBody = mapper.writeValueAsString(org);
+
+        when(ucsbOrganizationRepository.findById(eq(67L))).thenReturn(Optional.empty());
+
+        // act
+        MvcResult response = mockMvc.perform(
+                put("/api/ucsborganization?id=67")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .characterEncoding("utf-8")
+                        .content(requestBody)
+                        .with(csrf()))
+                .andExpect(status().isNotFound()).andReturn();
+
+        // assert
+        verify(ucsbOrganizationRepository, times(1)).findById(67L);
+        Map<String, Object> json = responseToJson(response);
+        assertEquals("UCSBOrganization with id 67 not found", json.get("message"));
+
     }
 
 }
