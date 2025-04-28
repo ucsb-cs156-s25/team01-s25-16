@@ -32,7 +32,7 @@ import java.time.LocalDateTime;
  * This is a REST controller for UCSBOrganization
  */
 
-@Tag(name = &quot;UCSBOrganizationController&quot;)
+@Tag(name = &quot;UCSBOrganization&quot;)
 @RequestMapping(&quot;/api/ucsborganization&quot;)
 @RestController
 <span class="fc" id="L38">@Slf4j</span>
@@ -46,7 +46,7 @@ import java.time.LocalDateTime;
      * 
      * @return an iterable of UCSBOrganization
      */
-    @Operation(summary= &quot;List all ucsb organizations&quot;)
+    @Operation(summary = &quot;List all ucsb organizations&quot;)
     @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
     @GetMapping(&quot;/all&quot;)
     public Iterable&lt;UCSBOrganization&gt; allUCSBOrganization() {
@@ -57,20 +57,20 @@ import java.time.LocalDateTime;
     /**
      * Create a new organization
      * 
-     * @param orgCode the ucsb organization code
+     * @param orgCode             the ucsb organization code
      * @param orgTranslationShort the ucsb organization translation short
-     * @param orgTranslation the ucsb organization translation
-     * @param inactive inactive boolean
+     * @param orgTranslation      the ucsb organization translation
+     * @param inactive            inactive boolean
      * @return the saved ucsborganization
      */
-    @Operation(summary= &quot;Create a new organization&quot;)
+    @Operation(summary = &quot;Create a new organization&quot;)
     @PreAuthorize(&quot;hasRole('ROLE_ADMIN')&quot;)
     @PostMapping(&quot;/post&quot;)
     public UCSBOrganization postUCSBOrganization(
-            @Parameter(name=&quot;orgCode&quot;) @RequestParam String orgCode,
-            @Parameter(name=&quot;orgTranslationShort&quot;) @RequestParam String orgTranslationShort,
-            @Parameter(name=&quot;orgTranslation&quot;) @RequestParam String orgTranslation,
-            @Parameter(name=&quot;inactive&quot;) @RequestParam boolean inactive)
+            @Parameter(name = &quot;orgCode&quot;) @RequestParam String orgCode,
+            @Parameter(name = &quot;orgTranslationShort&quot;) @RequestParam String orgTranslationShort,
+            @Parameter(name = &quot;orgTranslation&quot;) @RequestParam String orgTranslation,
+            @Parameter(name = &quot;inactive&quot;) @RequestParam boolean inactive)
             throws JsonProcessingException {
 
         // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
@@ -88,6 +88,23 @@ import java.time.LocalDateTime;
 <span class="fc" id="L88">        UCSBOrganization savedUcsbOrganization = ucsbOrganizationRepository.save(ucsbOrganization);</span>
 
 <span class="fc" id="L90">        return savedUcsbOrganization;</span>
+    }
+
+    /**
+     * Get a single ucsborganization by id
+     * 
+     * @param id the id of the ucsb organization
+     * @return a UCSBOrganization
+     */
+    @Operation(summary = &quot;Get a single ucsb Organization&quot;)
+    @PreAuthorize(&quot;hasRole('ROLE_USER')&quot;)
+    @GetMapping(&quot;&quot;)
+    public UCSBOrganization getById(
+            @Parameter(name = &quot;id&quot;) @RequestParam Long id) {
+<span class="fc" id="L104">        UCSBOrganization ucsbOrganization = ucsbOrganizationRepository.findById(id)</span>
+<span class="fc" id="L105">                .orElseThrow(() -&gt; new EntityNotFoundException(UCSBOrganization.class, id));</span>
+
+<span class="fc" id="L107">        return ucsbOrganization;</span>
     }
 
 }
