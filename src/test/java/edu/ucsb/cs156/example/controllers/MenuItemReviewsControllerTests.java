@@ -130,4 +130,61 @@ public class MenuItemReviewsControllerTests extends ControllerTestCase {
             String responseString = response.getResponse().getContentAsString();
             assertEquals(expectedJson, responseString);
     }
+
+    @Test
+    public void logged_out_users_cannot_get_by_id() throws Exception {
+                mockMvc.perform(get("/api/menuitemreviews?id=7"))
+                                .andExpect(status().is(403)); // logged out users can't get by id
+    }
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_that_logged_in_user_can_get_by_id_when_the_id_does_not_exist() throws Exception {
+
+                // arrange
+
+                when(menuItemReviewRepository.findById(eq(7L))).thenReturn(Optional.empty());
+
+                // act
+                MvcResult response = mockMvc.perform(get("/api/menuitemreviews?id=7"))
+                                .andExpect(status().isNotFound()).andReturn();
+
+                // assert
+
+                verify(menuItemReviewRepository, times(1)).findById(eq(7L));
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("EntityNotFoundException", json.get("type"));
+                assertEquals("MenuItemReview with id 7 not found", json.get("message"));
+    }
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_that_logged_in_user_can_get_by_id_when_the_id_does_exist() throws Exception {
+
+                // arrange
+
+                ZonedDateTime zdt1 = ZonedDateTime.parse("2022-01-03T00:00:00Z");
+
+                MenuItemReview menuItemReview1 = MenuItemReview.builder()
+                .reviewerEmail("christianjlee@ucsb.edu")
+                .stars(4)
+                .comments("This is a test review")
+                .dateReviewed(zdt1)
+                .build();
+
+                when(menuItemReviewRepository.findById(eq(7L))).thenReturn(Optional.of(menuItemReview1));
+
+                // act
+                MvcResult response = mockMvc.perform(get("/api/menuitemreviews?id=7"))
+                                .andExpect(status().isOk()).andReturn();
+
+                // assert
+
+                verify(menuItemReviewRepository, times(1)).findById(eq(7L));
+                String expectedJson = mapper.writeValueAsString(menuItemReview1);
+                String responseString = response.getResponse().getContentAsString();
+                assertEquals(expectedJson, responseString);
+                
+                
+   }
 }
