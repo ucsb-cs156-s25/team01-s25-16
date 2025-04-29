@@ -33,10 +33,10 @@ import java.time.ZonedDateTime;
  */
 
 @Tag(name = "MenuItemReviews")
-@RequestMapping("/api/menuItemReviews")
+@RequestMapping("/api/menuitemreviews")
 @RestController
 @Slf4j
-public class MenuItemReviewController extends ApiController {
+public class MenuItemReviewsController extends ApiController {
 
     @Autowired
     MenuItemReviewRepository menuItemReviewRepository;
