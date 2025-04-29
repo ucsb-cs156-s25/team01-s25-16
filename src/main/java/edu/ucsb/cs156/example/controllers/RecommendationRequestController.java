@@ -1,10 +1,8 @@
 package edu.ucsb.cs156.example.controllers;
 
 import edu.ucsb.cs156.example.entities.RecommendationRequest;
-import edu.ucsb.cs156.example.entities.UCSBDate;
 import edu.ucsb.cs156.example.errors.EntityNotFoundException;
 import edu.ucsb.cs156.example.repositories.RecommendationRequestRepository;
-import edu.ucsb.cs156.example.repositories.UCSBDateRepository;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -29,17 +27,23 @@ import jakarta.validation.Valid;
 
 import java.time.LocalDateTime;
 
-@Tag(name = "RecommendationRequest")
- @RequestMapping("/api/RecommendationRequest")
- @RestController
- @Slf4j
 
-public class RecommendationRequestController extends ApiController {
+/**
+ * This is a REST controller for RecommendationRequest
+ */
+
+
+@Tag(name = "RecommendationRequest")
+@RequestMapping("/api/recommendationrequest")
+@RestController
+@Slf4j
+public class RecommendationRequestController extends ApiController{
+
     @Autowired
     RecommendationRequestRepository recommendationRequestRepository;
 
     /**
-     * List all Recommendation Requests
+     * List all Recommendation requests
      * 
      * @return an iterable of RecommendationRequest
      */
@@ -47,10 +51,38 @@ public class RecommendationRequestController extends ApiController {
     @PreAuthorize("hasRole('ROLE_USER')")
     @GetMapping("/all")
     public Iterable<RecommendationRequest> allRecommendationRequests() {
-        Iterable<RecommendationRequest> recommendationRequests = recommendationRequestRepository.findAll();
-        return recommendationRequests;
+        Iterable<RecommendationRequest> requests = recommendationRequestRepository.findAll();
+        return requests;
     }
 
+    /**
+     * Get a single recommendation request by id
+     * 
+     * @param id the id of the recommendation request
+     * @return a RecommendationRequest
+     */
+    @Operation(summary= "Get a single recommendation request")
+    @PreAuthorize("hasRole('ROLE_USER')")
+    @GetMapping("")
+    public RecommendationRequest getById(
+            @Parameter(name="id") @RequestParam Long id) {
+        RecommendationRequest recommendationRequest = recommendationRequestRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
+
+        return recommendationRequest;
+    }
+
+    /**
+     * Create a new recommendation request
+     * 
+     * @param requesterEmail  the email of the person making the request
+     * @param professorEmail  the email of the professor
+     * @param explanation   explanation of the request
+     * @param dateRequested the date of the request
+     * @param dateNeeded    the date the request is needed
+     * @param done          the status of the request   
+     * @return the saved recommendation request
+     */
     @Operation(summary= "Create a new recommendation request")
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
@@ -66,8 +98,7 @@ public class RecommendationRequestController extends ApiController {
         // For an explanation of @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
         // See: https://www.baeldung.com/spring-date-parameters
 
-        log.info("dateRequested={}", dateRequested);
-        log.info("dateNeeded={}", dateNeeded);
+        log.info("localDateTime={}", dateRequested);
 
         RecommendationRequest recommendationRequest = new RecommendationRequest();
         recommendationRequest.setRequesterEmail(requesterEmail);
@@ -83,27 +114,28 @@ public class RecommendationRequestController extends ApiController {
     }
 
     /**
-     * Get a single recommendation request by id
+     * Delete a Recommendation Request
      * 
-     * @param id the id of the date
-     * @return a RecommendationRequest 
+     * @param id the id of the request to delete
+     * @return a message indicating the request was deleted
      */
-    @Operation(summary= "Get a single recommendation request")
-    @PreAuthorize("hasRole('ROLE_USER')")
-    @GetMapping("")
-    public RecommendationRequest getById(
+    @Operation(summary= "Delete a recommendation request")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("")
+    public Object deleteRecommendationRequest(
             @Parameter(name="id") @RequestParam Long id) {
         RecommendationRequest recommendationRequest = recommendationRequestRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
 
-        return recommendationRequest;
+        recommendationRequestRepository.delete(recommendationRequest);
+        return genericMessage("Recommendation Request with id %s deleted".formatted(id));
     }
 
     /**
      * Update a single recommendation request
      * 
-     * @param id       id of the recommendation request to update
-     * @param incoming the new recommendation request
+     * @param id       id of the request to update
+     * @param incoming the new request
      * @return the updated recommendation request object
      */
     @Operation(summary= "Update a single recommendation request")
@@ -126,23 +158,5 @@ public class RecommendationRequestController extends ApiController {
         recommendationRequestRepository.save(recommendationRequest);
 
         return recommendationRequest;
-    }
-
-     /**
-     * Delete a RecommendationRequest
-     * 
-     * @param id the id of the recommendation request to delete
-     * @return a message indicating the recommendation request was deleted
-     */
-    @Operation(summary= "Delete a RecommendationRequest")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @DeleteMapping("")
-    public Object deleteRecommendationRequest(
-            @Parameter(name="id") @RequestParam Long id) {
-        RecommendationRequest recommendationRequest = recommendationRequestRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException(RecommendationRequest.class, id));
-
-        recommendationRequestRepository.delete(recommendationRequest);
-        return genericMessage("RecommendationRequest with id %s deleted".formatted(id));
     }
 }

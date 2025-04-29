@@ -40,7 +40,7 @@ public class UCSBDatesControllerTests extends ControllerTestCase {
         UCSBDateRepository ucsbDateRepository;
 
         @MockBean
-        UserRepository userRepository;
+         UserRepository userRepository;
 
         // Authorization tests for /api/ucsbdates/admin/all
 
