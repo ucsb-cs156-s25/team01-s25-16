@@ -267,4 +267,55 @@ public class MenuItemReviewsControllerTests extends ControllerTestCase {
                 assertEquals("MenuItemReview with id 67 not found", json.get("message"));
 
     }
+
+        @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_can_delete_a_review() throws Exception {
+                // arrange
+
+                ZonedDateTime zdt1 = ZonedDateTime.parse("2022-01-03T00:00:00Z");
+
+
+                MenuItemReview menuItemReview1 = MenuItemReview.builder()
+                .reviewerEmail("christianjlee@ucsb.edu")
+                .stars(4)
+                .comments("This is a test review")
+                .dateReviewed(zdt1)
+                .build();
+
+                when(menuItemReviewRepository.findById(eq(15L))).thenReturn(Optional.of(menuItemReview1));
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                delete("/api/menuitemreviews?id=15")
+                                                .with(csrf()))
+                                .andExpect(status().isOk()).andReturn();
+
+                // assert
+                verify(menuItemReviewRepository, times(1)).findById(15L);
+                verify(menuItemReviewRepository, times(1)).delete(eq(menuItemReview1));
+
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("MenuItemReview with id 15 deleted", json.get("message"));
+        }
+
+        @WithMockUser(roles = { "ADMIN", "USER" })
+        @Test
+        public void admin_tries_to_delete_non_existant_review_and_gets_right_error_message()
+                        throws Exception {
+                // arrange
+
+                when(menuItemReviewRepository.findById(eq(15L))).thenReturn(Optional.empty());
+
+                // act
+                MvcResult response = mockMvc.perform(
+                                delete("/api/menuitemreviews?id=15")
+                                                .with(csrf()))
+                                .andExpect(status().isNotFound()).andReturn();
+
+                // assert
+                verify(menuItemReviewRepository, times(1)).findById(15L);
+                Map<String, Object> json = responseToJson(response);
+                assertEquals("MenuItemReview with id 15 not found", json.get("message"));
+        }
 }
