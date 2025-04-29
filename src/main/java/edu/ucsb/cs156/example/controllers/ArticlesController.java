@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 
 import org.springframework.web.bind.annotation.RestController;
@@ -130,6 +131,24 @@ public class ArticlesController extends ApiController {
         articlesRepository.save(article);
 
         return article;
+    }
+        /**
+     * Delete a single article by id
+     * 
+     * @param id the id of the article to delete
+     * @return a message indicating success or failure
+     */
+    @Operation(summary = "Delete a single article by id")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @DeleteMapping("")
+    public String deleteArticle(
+        @Parameter(name = "id") @RequestParam Long id) {
+        
+        Article article = articlesRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(Article.class, id));
+
+        articlesRepository.delete(article);
+        return "record " + id + " deleted";
     }
 
 }
