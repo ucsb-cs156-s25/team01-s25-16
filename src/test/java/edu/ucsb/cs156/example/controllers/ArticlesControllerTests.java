@@ -132,4 +132,50 @@ public class ArticlesControllerTests extends ControllerTestCase {
         String responseString = response.getResponse().getContentAsString();
         assertEquals(expectedJson, responseString);
     }
+    @WithMockUser(roles = { "USER" })
+@Test
+public void test_that_logged_in_user_can_get_by_id_when_article_exists() throws Exception {
+    // arrange
+    LocalDateTime dateAdded = LocalDateTime.parse("2024-05-01T12:00:00");
+
+    Article article = Article.builder()
+        .title("Test Title")
+        .url("http://testurl.com")
+        .explanation("Test Explanation")
+        .email("test@example.com")
+        .dateAdded(dateAdded)
+        .build();
+
+    when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.of(article));
+
+    // act
+    MvcResult response = mockMvc.perform(get("/api/articles?id=123"))
+        .andExpect(status().isOk())
+        .andReturn();
+
+    // assert
+    verify(articlesRepository, times(1)).findById(123L);
+    String expectedJson = mapper.writeValueAsString(article);
+    String responseString = response.getResponse().getContentAsString();
+    assertEquals(expectedJson, responseString);
+}
+
+    @WithMockUser(roles = { "USER" })
+    @Test
+    public void test_that_logged_in_user_get_by_id_returns_404_when_article_does_not_exist() throws Exception {
+        // arrange
+        when(articlesRepository.findById(123L)).thenReturn(java.util.Optional.empty());
+
+        // act
+        MvcResult response = mockMvc.perform(get("/api/articles?id=123"))
+            .andExpect(status().isNotFound())
+            .andReturn();
+
+        // assert
+        verify(articlesRepository, times(1)).findById(123L);
+        String responseString = response.getResponse().getContentAsString();
+        Map<String, Object> json = mapper.readValue(responseString, Map.class);
+        assertEquals("Article with id 123 not found", json.get("message"));
+    }
+
 }
