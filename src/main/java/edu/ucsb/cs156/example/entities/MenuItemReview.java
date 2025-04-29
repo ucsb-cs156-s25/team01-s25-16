@@ -9,7 +9,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 /** 
  * This is a JPA entity that represents a MenuItemReview.
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Entity(name = "MenuItemReviews")
+@Entity(name = "menuitemreviews")
 public class MenuItemReview {
   @Id
   @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,6 +27,6 @@ public class MenuItemReview {
 
   private String reviewerEmail;
   private int stars;
-  private LocalDateTime dateReviewed;
   private String comments;
+  ZonedDateTime dateReviewed;
 }
