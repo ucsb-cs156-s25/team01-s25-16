@@ -57,6 +57,7 @@ public class MenuItemReviewsController extends ApiController {
         /**
      * Create a new review
      * 
+     * @param itemId         the item Id
      * @param reviewerEmail  the reviewer email
      * @param stars          the number of stars
      * @param dateReviewed   the date reviewed
@@ -67,6 +68,7 @@ public class MenuItemReviewsController extends ApiController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/post")
     public MenuItemReview postMenuItemReview(
+            @Parameter(name="itemId") @RequestParam int itemId,
             @Parameter(name="reviewerEmail") @RequestParam String reviewerEmail,
             @Parameter(name="stars") @RequestParam int stars,
             @Parameter(name="comments") @RequestParam String comments,
@@ -80,6 +82,7 @@ public class MenuItemReviewsController extends ApiController {
 
 
         MenuItemReview menuItemReview = new MenuItemReview();
+        menuItemReview.setItemId(itemId);
         menuItemReview.setReviewerEmail(reviewerEmail);
         menuItemReview.setStars(stars);
         menuItemReview.setDateReviewed(dateReviewed);
@@ -123,6 +126,7 @@ public class MenuItemReviewsController extends ApiController {
         MenuItemReview menuItemReview = menuItemReviewRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException(MenuItemReview.class, id));
 
+        menuItemReview.setItemId(incoming.getItemId());
         menuItemReview.setReviewerEmail(incoming.getReviewerEmail());
         menuItemReview.setStars(incoming.getStars());
         menuItemReview.setComments(incoming.getComments());
