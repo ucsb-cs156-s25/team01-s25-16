@@ -122,9 +122,10 @@ public class MenuItemReviewsControllerTests extends ControllerTestCase {
 
             // act
             MvcResult response = mockMvc.perform(
-                            post("/api/menuitemreviews/post?comments=test-review&reviewerEmail=christianjlee@ucsb.edu&stars=4&dateReviewed=2022-01-03T00:00:00Z")
-                                            .with(csrf()))
-                            .andExpect(status().isOk()).andReturn();
+                        post("/api/menuitemreviews/post?itemId=1&comments=test-review&reviewerEmail=christianjlee@ucsb.edu&stars=4&dateReviewed=2022-01-03T00:00:00Z")
+                        .with(csrf()))
+                        .andExpect(status().isOk()).andReturn();
+
 
             // assert
             verify(menuItemReviewRepository, times(1)).save(eq(menuItemReview1));
